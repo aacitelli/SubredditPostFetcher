@@ -28,13 +28,11 @@ function getSubredditName(accessToken)
     });
 }
 
-async function getSubredditInformation(name, accessToken)
+async function getSubredditInformation(name)
 {
     console.log("Subreddit: /r/" + name);
 
     let posts = await getSubredditPosts(name)
-
-    console.log("Calling outputPosts with posts object.");
     outputPosts(posts);
 
     // Outputs entire JSON tree 
