@@ -1,10 +1,6 @@
 // Lets us get user input, basically
 const readline = require("readline");
-const authData = require("./authData");
-const btoa = require("btoa")
-const opn = require("opn");
-const http = require("http");
-const fs = require("fs");
+const util = require("util");
 
 // Fetch isn't implemented by default in Node so we have to use a wrapper, basically
 global.fetch = require("node-fetch");
@@ -18,12 +14,7 @@ const rl = readline.createInterface
     }
 )
 
-// Creating the server at the redirect URL so we can do things with the retrieved access code 
-// Need to authenticate before we can do anything
-getSubredditName()
-{
-
-}
+getSubredditName();
 
 function getSubredditName(accessToken)
 {
@@ -39,33 +30,56 @@ function getSubredditName(accessToken)
 
 async function getSubredditInformation(name, accessToken)
 {
-    let info = await getSubredditInfo(name);
-    console.log("Subreddit Information: ");
-    console.log(info);
+    console.log("Subreddit: /r/" + name);
+
+    let posts = await getSubredditPosts(name)
+
+    console.log("Calling outputPosts with posts object.");
+    outputPosts(posts);
+
+    // Outputs entire JSON tree 
+    // console.log(util.inspect(posts, {showHidden: false, depth: null}));
 }
 
-async function getSubredditInfo(name)
+async function getSubredditPosts(name)
 {
-    return fetch("https://reddit.com/r/" + name + "/top.json")
+    return fetch("https://reddit.com/r/" + name + "/hot.json?limit=10")
     .then(response =>
     {
         return response.json();
     })
     .then(json =>
     {
-        console.log("Parsed JSON: ");
-        console.log(json);
-
-        for (let key in json.data.children[0])
-        {
-            console.log(key);
-        }
-
+        console.log("Posts retrieved.");
         return json;
     })
     .catch(err =>
     {
         console.log(err);
-    })
+    });
+}
+
+async function outputPosts(json)
+{
+    // Loops through each post itself 
+    for (let i = 0; i < json.data.children.length; i++)
+    {
+        /*
+        console.log("Post: ");
+        console.log(json.data.children[i]);
+        */
+
+        console.log("Post Title: ");
+        console.log(json.data.children[i].data.title + "\n");
+
+        console.log("Post Content: ");
+        console.log(json.data.children[i].data.selftext);
+
+        // Adds a divider in between posts - Conditional is so that it doesn't happen after the last one
+        if (i != json.data.children.length - 1)
+        {
+            console.log("\n-------------------------------\n")
+        }
+    }
 }
 

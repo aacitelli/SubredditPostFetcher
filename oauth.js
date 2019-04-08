@@ -1,3 +1,9 @@
+const authData = require("./authData");
+const btoa = require("btoa")
+const opn = require("opn");
+const http = require("http");
+const fs = require("fs");
+
 // Listens for the redirect once authenticated and extracts data from its URL to give us the access token 
 function setupRedirectServer()
 {
