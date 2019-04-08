@@ -1,1 +1,5 @@
+# Keep sensitive data out of commit history
 authData.js
+
+# Can't have node modules taking up my repo space 
+node_modules/*
