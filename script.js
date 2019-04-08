@@ -19,3 +19,8 @@ rl.question("Enter subreddit name: ", (answer) =>
     rl.close();
 });
 
+function processSubreddit(subredditName)
+{
+    
+}
+
