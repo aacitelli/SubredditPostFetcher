@@ -1,12 +1,4 @@
-// I'll probably build full oauth into this eventually 
-
-/*
-setupRedirectServer();
-getAccessToken();
-*/
-
-
-// Listens for the redirect once authenticated and extracts data from it
+// Listens for the redirect once authenticated and extracts data from its URL to give us the access token 
 function setupRedirectServer()
 {
     // Listens for the access code redirect
@@ -19,7 +11,7 @@ function setupRedirectServer()
     }).listen(4000);
 }
 
-/*
+// Gets an access token by taking the user to a webpage and having them allow access to it 
 function getAccessToken()
 {
     let client_id = authData.data.id;
@@ -46,4 +38,30 @@ function getAccessToken()
         console.log(err);
     });
 }
-*/
+
+// Uses client ID and secret to get an access token
+function appOnlyAuth()
+{
+    fetch("https://www.reddit.com/api/v1/access_token", 
+    { 
+        method: "POST",
+        headers: 
+        {
+            "Authorization": "Basic " + btoa(authData.id + ":" + authData.secret),
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "grant_type=client_credentials"
+    })
+    .then(response =>
+    {
+        return response.json();
+    })
+    .then(json =>
+    {
+        getSubredditName(json.access_token);
+    })
+    .catch(err => 
+    {
+        console.log("Error getting data: " + err);
+    });
+}
