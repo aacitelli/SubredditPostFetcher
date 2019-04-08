@@ -3,6 +3,8 @@ const readline = require("readline");
 const authData = require("./authData");
 const btoa = require("btoa")
 const opn = require("opn");
+const http = require("http");
+const fs = require("fs");
 
 // Fetch isn't implemented by default in Node so we have to use a wrapper, basically
 global.fetch = require("node-fetch");
@@ -16,8 +18,12 @@ const rl = readline.createInterface
     }
 )
 
+
+
+// Creating the server at the redirect URL so we can do things with the retrieved access code 
 // Need to authenticate before we can do anything
-authenticate();
+setupRedirectServer();
+getAccessToken();
 
 /*
 rl.question("Enter subreddit name: ", (answer) =>
@@ -30,7 +36,20 @@ rl.question("Enter subreddit name: ", (answer) =>
 });
 */
 
-function authenticate()
+// Listens for the redirect once authenticated and extracts data from it
+function setupRedirectServer()
+{
+    // Listens for the access code redirect
+    http.createServer(function(req, res)
+    {
+        let codeIndex = req.url.indexOf("code=");
+        let accessCode = req.url.substring(codeIndex + 5, req.url.length);
+        appOnlyAuth(accessCode);
+        return;
+    }).listen(4000);
+}
+
+function getAccessToken()
 {
     let client_id = authData.data.id;
     let response_type = "code";
@@ -55,14 +74,19 @@ function authenticate()
     {
         console.log(err);
     });
+}
 
-    /*
+function appOnlyAuth(accessToken)
+{
+    console.log("Access Token: " + accessToken);
+    console.log("Client Secret: " + authData.data.secret);
+
     fetch("https://www.reddit.com/api/v1/access_token", 
     { 
         method: "POST",
         headers: 
         {
-            "Authorization": "Basic " + btoa(authData.data.secret) + ":",
+            "Authorization": "Basic " + btoa(accessToken + ":" + authData.data.secret),
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: "grant_type=client_credentials"
@@ -75,6 +99,5 @@ function authenticate()
     {
         console.log("Error getting data: " + err);
     });
-    */
 }
 
